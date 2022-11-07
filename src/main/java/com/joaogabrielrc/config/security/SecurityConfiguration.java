@@ -2,20 +2,28 @@ package com.joaogabrielrc.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @EnableWebSecurity
 public class SecurityConfiguration {
 
   @Autowired
   private AuthenticationService authenticationService;
+
+  @Autowired
+  private TokenService tokenService;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -32,9 +40,22 @@ public class SecurityConfiguration {
     http.authorizeRequests()
       .antMatchers(GET, "/api/**/topics").permitAll()
       .antMatchers(GET, "/api/**/topics/*").permitAll()
+      .antMatchers(POST, "/api/**/auth").permitAll()
       .anyRequest().authenticated()
-      .and().formLogin();
+      .and().csrf().disable()
+      .sessionManagement().sessionCreationPolicy(STATELESS)
+      .and().addFilterBefore(
+        new TokenAuthenticationFilter(tokenService),
+        UsernamePasswordAuthenticationFilter.class
+      );
     return http.build();
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(
+    AuthenticationConfiguration authConfiguration
+  ) throws Exception {
+    return authConfiguration.getAuthenticationManager();
   }
 
 }
