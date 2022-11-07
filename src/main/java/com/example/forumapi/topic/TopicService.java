@@ -2,6 +2,8 @@ package com.example.forumapi.topic;
 
 import com.example.forumapi.topic.dto.TopicUpdateDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +19,10 @@ public class TopicService {
     this.topicRepository = topicRepository;
   }
 
-  public List<Topic> getList(String courseName) {
+  public Page<Topic> getList(String courseName, Pageable pageable) {
     if (courseName != null)
-      return this.topicRepository.findByCourseName(courseName);
-    return this.topicRepository.findAll();
+      return this.topicRepository.findByCourseName(courseName, pageable);
+    return this.topicRepository.findAll(pageable);
   }
 
   public void create(Topic topic) {

@@ -5,6 +5,9 @@ import com.example.forumapi.topic.dto.TopicDetailDto;
 import com.example.forumapi.topic.dto.TopicDto;
 import com.example.forumapi.topic.dto.TopicUpdateDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,9 +29,17 @@ public class TopicController {
   private TopicMapper topicMapper;
 
   @GetMapping
-  public List<TopicDto> getList(String courseName) {
-    List<Topic> topics = topicService.getList(courseName);
-    return topics.stream().map(topicMapper::toDto).collect(Collectors.toList());
+  public ResponseEntity<List<TopicDto>> getList(
+    @RequestParam(value="course", required=false)
+    String courseName,
+    @PageableDefault(sort="title", size=15)
+    Pageable pageable
+  ) {
+    Page<Topic> topics = topicService.getList(courseName, pageable);
+    List<TopicDto> topicDtoList = topics.stream()
+      .map(topicMapper::toDto)
+      .collect(Collectors.toList());
+    return ResponseEntity.ok(topicDtoList);
   }
 
   @PostMapping
