@@ -25,6 +25,13 @@ public class Profile implements GrantedAuthority {
   @Column(name="role")
   private String role;
 
+  private Profile() {
+  }
+
+  public Profile(String role) {
+    this.role = role;
+  }
+
   @Override
   public String getAuthority() {
     return this.role;

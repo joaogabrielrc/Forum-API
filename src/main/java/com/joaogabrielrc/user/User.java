@@ -63,6 +63,10 @@ public class User implements UserDetails {
     return this.name;
   }
 
+  public void addProfile(Profile profile) {
+    this.profiles.add(profile);
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return this.profiles;
